@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/restClient';
 
 import AnimatedBackground from '@/components/ui/AnimatedBackground';
 import LanguageSelector from '@/components/assistant/LanguageSelector';
@@ -86,7 +86,7 @@ export default function Onboarding() {
     if (currentStep === steps.length - 1) {
       // Save preferences and navigate to home
       try {
-        await base44.entities.UserPreferences.create({
+        await api.preferences.create({
           language,
           voice_enabled: permissions.microphone,
           permissions: {

@@ -1,9 +1,13 @@
 const Command = require("../models/Command");
 
+// Mock storage
+let mockCommands = [];
+
 // CREATE command
 exports.createCommand = async (req, res) => {
   try {
-    const command = await Command.create(req.body);
+    const command = { id: Date.now().toString(), ...req.body, created_date: new Date() };
+    mockCommands.push(command);
     res.status(201).json(command);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -13,7 +17,14 @@ exports.createCommand = async (req, res) => {
 // GET all commands (filterable)
 exports.getCommands = async (req, res) => {
   try {
-    const commands = await Command.find(req.query);
+    // Basic filtering logic if needed (e.g. by utterance)
+    let commands = [...mockCommands];
+    if (req.query.utterance) {
+        commands = commands.filter(c => c.utterance === req.query.utterance);
+    }
+    // Simple sort (descending date)
+    commands.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
     res.json(commands);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -23,7 +34,7 @@ exports.getCommands = async (req, res) => {
 // GET single command
 exports.getCommandById = async (req, res) => {
   try {
-    const command = await Command.findById(req.params.id);
+    const command = mockCommands.find(c => c.id === req.params.id);
     if (!command) {
       return res.status(404).json({ message: "Command not found" });
     }
@@ -36,12 +47,13 @@ exports.getCommandById = async (req, res) => {
 // UPDATE command
 exports.updateCommand = async (req, res) => {
   try {
-    const updated = await Command.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.json(updated);
+    const index = mockCommands.findIndex(c => c.id === req.params.id);
+    if (index === -1) {
+        return res.status(404).json({ message: "Command not found" });
+    }
+
+    mockCommands[index] = { ...mockCommands[index], ...req.body };
+    res.json(mockCommands[index]);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -50,7 +62,12 @@ exports.updateCommand = async (req, res) => {
 // DELETE command
 exports.deleteCommand = async (req, res) => {
   try {
-    await Command.findByIdAndDelete(req.params.id);
+    const index = mockCommands.findIndex(c => c.id === req.params.id);
+    if (index === -1) {
+        return res.status(404).json({ message: "Command not found" });
+    }
+
+    mockCommands.splice(index, 1);
     res.json({ message: "Command deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

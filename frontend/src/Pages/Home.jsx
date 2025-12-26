@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44 } from '@/Api/base44Client';
+import { api } from '@/api/restClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import VoiceButton from '@/components/assistant/VoiceButton';
@@ -48,7 +48,7 @@ export default function Home() {
 
     try {
       // Use InvokeLLM to understand the command
-      const result = await base44.integrations.Core.InvokeLLM({
+      const result = await api.invokeLLM({
         prompt: `You are an intelligent voice assistant. Analyze this user command and provide a structured response.
 
 User command: "${text}"
@@ -104,7 +104,7 @@ Examples:
       setResponse(result.response);
 
       // Save command to history
-      await base44.entities.Command.create({
+      await api.commands.create({
         utterance: text,
         intent: result.intent,
         entities: result.entities,
@@ -285,9 +285,9 @@ Examples:
     
     // Update command status
     if (currentIntent?.id) {
-      const commands = await base44.entities.Command.filter({ utterance: currentIntent.utterance });
+      const commands = await api.commands.list({ utterance: currentIntent.utterance });
       if (commands.length > 0) {
-        await base44.entities.Command.update(commands[0].id, { status: 'executed' });
+        await api.commands.update(commands[0].id, { status: 'executed' });
         queryClient.invalidateQueries({ queryKey: ['commands'] });
       }
     }
@@ -300,9 +300,9 @@ Examples:
     
     // Update command status
     if (currentIntent?.utterance) {
-      const commands = await base44.entities.Command.filter({ utterance: currentIntent.utterance });
+      const commands = await api.commands.list({ utterance: currentIntent.utterance });
       if (commands.length > 0) {
-        await base44.entities.Command.update(commands[0].id, { status: 'cancelled' });
+        await api.commands.update(commands[0].id, { status: 'cancelled' });
         queryClient.invalidateQueries({ queryKey: ['commands'] });
       }
     }

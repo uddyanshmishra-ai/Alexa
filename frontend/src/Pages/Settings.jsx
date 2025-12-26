@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/restClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -56,7 +56,7 @@ export default function Settings() {
   const { data: savedPrefs } = useQuery({
     queryKey: ['userPreferences'],
     queryFn: async () => {
-      const prefs = await base44.entities.UserPreferences.list('-created_date', 1);
+      const prefs = await api.preferences.list({ sort: '-created_date', limit: 1 });
       return prefs[0] || null;
     }
   });
@@ -74,9 +74,9 @@ export default function Settings() {
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       if (savedPrefs?.id) {
-        return base44.entities.UserPreferences.update(savedPrefs.id, data);
+        return api.preferences.update(savedPrefs.id, data);
       } else {
-        return base44.entities.UserPreferences.create(data);
+        return api.preferences.create(data);
       }
     },
     onSuccess: () => {

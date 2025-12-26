@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/restClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -66,7 +66,7 @@ export default function Chat() {
     setIsProcessing(true);
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
+      const result = await api.invokeLLM({
         prompt: `You are a helpful voice assistant. Respond to this user message conversationally.
         
 User: "${text}"
@@ -101,7 +101,7 @@ Keep responses concise and friendly. Respond in the same language as the user.`,
       setMessages(prev => [...prev, assistantMessage]);
 
       // Save to history
-      await base44.entities.Command.create({
+      await api.commands.create({
         utterance: text,
         response: result.response,
         status: 'executed',

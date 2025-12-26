@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/restClient';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -36,7 +36,7 @@ export default function History() {
 
   const { data: commands = [], isLoading, refetch } = useQuery({
     queryKey: ['commands'],
-    queryFn: () => base44.entities.Command.list('-created_date', 100),
+    queryFn: () => api.commands.list({ sort: '-created_date', limit: 100 }),
   });
 
   // Get unique intents for filter
