@@ -17,7 +17,16 @@ exports.invokeLLM = async (req, res) => {
         // Extract url roughly
         const urlMatch = prompt.match(/open (https?:\/\/[^\s]+|[\w.]+)/i);
         if (urlMatch) {
-            actionData = { url: urlMatch[1].startsWith('http') ? urlMatch[1] : `https://${urlMatch[1]}` };
+            let capturedUrl = urlMatch[1];
+            // If it doesn't start with http/https
+            if (!capturedUrl.match(/^https?:\/\//)) {
+                // If it looks like a bare word (no dot), assume .com
+                if (!capturedUrl.includes('.')) {
+                    capturedUrl += '.com';
+                }
+                capturedUrl = `https://${capturedUrl}`;
+            }
+            actionData = { url: capturedUrl };
         }
     } else if (prompt.toLowerCase().includes("search")) {
         intent = "navigation.search";
